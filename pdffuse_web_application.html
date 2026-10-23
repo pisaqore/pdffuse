@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDFFuse | 100% Private, Client-Side Online PDF Utility Suite</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- PDF-Lib Library for Client-Side Operations -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        },
+                        darkbg: '#0B0F17',
+                        cardbg: '#111827',
+                        borderbg: '#1F2937'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0B0F17;
+            color: #F3F4F6;
+            font-family: 'Inter', sans-serif;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #818CF8 0%, #C084FC 50%, #E879F9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .file-dropzone {
+            border: 2px dashed rgba(99, 102, 241, 0.4);
+            transition: all 0.2s ease-in-out;
+        }
+        .file-dropzone:hover, .file-dropzone.drag-over {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.05);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B0F17;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1F2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-purple-500 flex items-center justify-center shadow-lg shadow-brand-500/20 group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-layer-group text-white text-xl"></i>
+                </div>
+                <span class="text-2xl font-extrabold tracking-tight text-white">PDF<span class="gradient-text">Fuse</span></span>
+            </a>
+
+            <!-- Privacy Badge (Desktop) -->
+            <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>100% Client-Side Private</span>
+            </div>
+
+            <!-- Header Nav -->
+            <nav class="flex items-center gap-4">
+                <a href="#features" class="hidden sm:inline-block text-sm text-gray-400 hover:text-white transition-colors">Features</a>
+                <a href="#faq" class="hidden sm:inline-block text-sm text-gray-400 hover:text-white transition-colors">FAQ</a>
+                <button onclick="scrollToTool()" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-medium text-sm transition-all shadow-md shadow-brand-600/30">
+                    Launch Studio
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow">
+
+        <!-- Hero Section -->
+        <section class="relative pt-12 pb-8 md:pt-20 md:pb-12 px-4 max-w-7xl mx-auto text-center">
+            <!-- Background Glow -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-brand-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs sm:text-sm font-medium mb-6">
+                <i class="fa-solid fa-lock text-xs"></i> Zero Server Uploads • Files Processed in RAM
+            </div>
+
+            <h1 class="text-4xl sm:text-6xl font-black text-white tracking-tight leading-none mb-6">
+                Fast, Private & Free <br class="hidden sm:inline" />
+                <span class="gradient-text">PDF Tools in Your Browser</span>
+            </h1>
+
+            <p class="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
+                Merge, convert, split, and rotate PDFs with absolute privacy. Your files never touch a cloud server or database—processed entirely on your device.
+            </p>
+
+            <!-- Tool Selector Nav Tabs -->
+            <div id="tool-studio" class="max-w-4xl mx-auto mb-6">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 rounded-2xl bg-gray-900/80 border border-gray-800">
+                    <button onclick="switchTool('merge')" id="tab-merge" class="tool-tab flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all bg-brand-600 text-white shadow-md">
+                        <i class="fa-solid fa-code-merge"></i> Merge PDFs
+                    </button>
+                    <button onclick="switchTool('img2pdf')" id="tab-img2pdf" class="tool-tab flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all">
+                        <i class="fa-regular fa-image"></i> Image to PDF
+                    </button>
+                    <button onclick="switchTool('split')" id="tab-split" class="tool-tab flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all">
+                        <i class="fa-solid fa-scissors"></i> Split / Extract
+                    </button>
+                    <button onclick="switchTool('rotate')" id="tab-rotate" class="tool-tab flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all">
+                        <i class="fa-solid fa-rotate-right"></i> Rotate PDF
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Interactive Tool Studio Card -->
+            <div class="max-w-4xl mx-auto glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl text-left border border-gray-800/80">
+
+                <!-- Dynamic Title & Description -->
+                <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-800 pb-4">
+                    <div>
+                        <h2 id="tool-title" class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-code-merge text-brand-400"></i> Merge Multiple PDFs
+                        </h2>
+                        <p id="tool-desc" class="text-sm text-gray-400 mt-1">Combine multiple PDF files into a single structured document instantly.</p>
+                    </div>
+                    <span class="text-xs px-2.5 py-1 rounded-lg bg-gray-800 text-gray-400 w-max font-mono border border-gray-700">Client-Side Engine</span>
+                </div>
+
+                <!-- Interactive File Dropzone -->
+                <div id="dropzone" class="file-dropzone rounded-2xl p-8 sm:p-12 text-center cursor-pointer flex flex-col items-center justify-center group mb-6">
+                    <input type="file" id="file-input" class="hidden" multiple accept="application/pdf">
+                    <div class="w-16 h-16 rounded-2xl bg-brand-500/10 text-brand-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <i id="dropzone-icon" class="fa-solid fa-cloud-arrow-up text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-1">Click to select files or drag & drop</h3>
+                    <p id="file-types-label" class="text-xs text-gray-400">Supports PDF files up to any size (RAM Limited)</p>
+                </div>
+
+                <!-- Selected Files List Container -->
+                <div id="file-list-container" class="hidden space-y-3 mb-6">
+                    <div class="flex items-center justify-between text-xs text-gray-400 px-1 font-semibold uppercase tracking-wider">
+                        <span>Selected Items (<span id="file-count">0</span>)</span>
+                        <button onclick="clearFiles()" class="text-rose-400 hover:text-rose-300 transition-colors">Clear All</button>
+                    </div>
+                    <div id="file-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        <!-- Dynamic file items injected here -->
+                    </div>
+                </div>
+
+                <!-- Tool Specific Options Panel -->
+                <div id="tool-options" class="hidden bg-gray-900/60 rounded-xl p-4 border border-gray-800/80 mb-6 space-y-4">
+                    <!-- Dynamic Options Injected via JS -->
+                </div>
+
+                <!-- Process Action Button & Progress -->
+                <div class="flex flex-col sm:flex-row items-center gap-4">
+                    <button id="process-btn" onclick="processPDF()" disabled class="w-full sm:w-auto flex-1 py-3.5 px-6 rounded-xl bg-gray-800 text-gray-500 font-bold text-base flex items-center justify-center gap-2 cursor-not-allowed transition-all shadow-lg">
+                        <i class="fa-solid fa-bolt"></i> <span id="btn-text">Select Files to Begin</span>
+                    </button>
+                </div>
+
+                <!-- Status / Error Alert Box -->
+                <div id="status-box" class="hidden mt-4 p-4 rounded-xl text-sm flex items-center gap-3"></div>
+
+            </div>
+        </section>
+
+        <!-- Value Proposition / Security Banner -->
+        <section class="py-12 bg-gray-900/50 border-y border-gray-800/80 my-12">
+            <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-center sm:text-left">
+                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-user-shield text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-white font-bold mb-1">100% Privacy Guaranteed</h4>
+                        <p class="text-gray-400 text-sm leading-relaxed">Your files never leave your computer. All rendering and merging happens directly in your browser's WebAssembly/RAM.</p>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:items-start sm:flex-row items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-brand-500/10 text-brand-400 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-gauge-high text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-white font-bold mb-1">Zero File Limits & Ultra Fast</h4>
+                        <p class="text-gray-400 text-sm leading-relaxed">Forget upload queues or 10MB limits. Experience instantaneous processing powered by local device hardware.</p>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:items-start sm:flex-row items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-wifi-slash text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-white font-bold mb-1">Works Completely Offline</h4>
+                        <p class="text-gray-400 text-sm leading-relaxed">Once loaded, PDFFuse functions entirely offline without requiring an active internet connection.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature Grid Section -->
+        <section id="features" class="py-12 max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-white mb-3">Designed for Speed and Privacy</h2>
+                <p class="text-gray-400 max-w-xl mx-auto text-sm sm:text-base">A complete document utility suite that operates with zero backend infrastructure costs.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="glass-panel p-6 rounded-2xl border border-gray-800 hover:border-gray-700 transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-code-merge"></i>
+                    </div>
+                    <h3 class="text-white font-bold mb-2">Smart PDF Merge</h3>
+                    <p class="text-gray-400 text-xs leading-relaxed">Reorder pages dynamically, combine multiple reports, and generate unified documents seamlessly.</p>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl border border-gray-800 hover:border-gray-700 transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-4">
+                        <i class="fa-regular fa-image"></i>
+                    </div>
+                    <h3 class="text-white font-bold mb-2">Image to PDF</h3>
+                    <p class="text-gray-400 text-xs leading-relaxed">Convert JPG, PNG, and WebP images directly into a sleek, printable PDF file in seconds.</p>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl border border-gray-800 hover:border-gray-700 transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-scissors"></i>
+                    </div>
+                    <h3 class="text-white font-bold mb-2">Precision Page Split</h3>
+                    <p class="text-gray-400 text-xs leading-relaxed">Extract specific page ranges or isolate individual pages into standalone PDF documents.</p>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl border border-gray-800 hover:border-gray-700 transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-4">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </div>
+                    <h3 class="text-white font-bold mb-2">Rotation Corrector</h3>
+                    <p class="text-gray-400 text-xs leading-relaxed">Fix upside-down or sideways scanned documents with 90°, 180°, or 270° angle rotations.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="py-12 max-w-4xl mx-auto px-4">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-white mb-2">Frequently Asked Questions</h2>
+                <p class="text-gray-400 text-sm">Everything you need to know about our browser-native processing.</p>
+            </div>
+
+            <div class="space-y-4">
+                <details class="glass-panel rounded-2xl p-5 border border-gray-800 group cursor-pointer">
+                    <summary class="font-semibold text-white flex justify-between items-center list-none">
+                        <span>Are my sensitive documents uploaded to any server?</span>
+                        <i class="fa-solid fa-chevron-down text-gray-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3 leading-relaxed">
+                        No, absolutely not. PDFFuse operates entirely inside your web browser using JavaScript and client-side libraries. Your files are processed in your device's memory (RAM) and are never transmitted over the internet.
+                    </p>
+                </details>
+
+                <details class="glass-panel rounded-2xl p-5 border border-gray-800 group cursor-pointer">
+                    <summary class="font-semibold text-white flex justify-between items-center list-none">
+                        <span>Is there a file size or daily document limit?</span>
+                        <i class="fa-solid fa-chevron-down text-gray-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3 leading-relaxed">
+                        Unlike traditional SaaS tools that charge for large files, PDFFuse has no artificial limits. The only restriction is the amount of RAM available on your smartphone or computer.
+                    </p>
+                </details>
+
+                <details class="glass-panel rounded-2xl p-5 border border-gray-800 group cursor-pointer">
+                    <summary class="font-semibold text-white flex justify-between items-center list-none">
+                        <span>Does PDFFuse work on mobile devices?</span>
+                        <i class="fa-solid fa-chevron-down text-gray-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3 leading-relaxed">
+                        Yes! PDFFuse is designed with a mobile-first responsive architecture. You can easily merge, rotate, or convert PDFs directly from your iPhone, iPad, or Android phone.
+                    </p>
+                </details>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-panel border-t border-gray-800 mt-16 py-8">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-brand-600 flex items-center justify-center text-white text-xs font-bold">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <span class="text-lg font-bold text-white">PDFFuse.com</span>
+            </div>
+            <p class="text-gray-500 text-xs text-center">
+                © 2026 PDFFuse. Client-Side PDF Utility Suite. Built for privacy and speed.
+            </p>
+            <div class="flex items-center gap-4 text-xs text-gray-400">
+                <span class="inline-flex items-center gap-1.5 text-emerald-400"><i class="fa-solid fa-circle text-[8px]"></i> Systems Operational</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- App Logic Script -->
+    <script>
+        // State Management
+        let currentTool = 'merge';
+        let selectedFiles = [];
+
+        // DOM Element References
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('file-input');
+        const fileList = document.getElementById('file-list');
+        const fileListContainer = document.getElementById('file-list-container');
+        const fileCountSpan = document.getElementById('file-count');
+        const processBtn = document.getElementById('process-btn');
+        const btnText = document.getElementById('btn-text');
+        const statusBox = document.getElementById('status-box');
+        const toolOptions = document.getElementById('tool-options');
+
+        // Tool Configs
+        const toolMeta = {
+            merge: {
+                title: 'Merge Multiple PDFs',
+                desc: 'Combine multiple PDF files into a single structured document instantly.',
+                icon: 'fa-code-merge',
+                accept: 'application/pdf',
+                inputMultiple: true,
+                btnText: 'Merge & Download PDF'
+            },
+            img2pdf: {
+                title: 'Convert Images to PDF',
+                desc: 'Convert JPG or PNG images into a clean single PDF file.',
+                icon: 'fa-image',
+                accept: 'image/jpeg, image/png, image/webp',
+                inputMultiple: true,
+                btnText: 'Convert Images to PDF'
+            },
+            split: {
+                title: 'Split / Extract Pages',
+                desc: 'Extract specific pages from a PDF document into a new file.',
+                icon: 'fa-scissors',
+                accept: 'application/pdf',
+                inputMultiple: false,
+                btnText: 'Extract Pages & Download'
+            },
+            rotate: {
+                title: 'Rotate PDF Document',
+                desc: 'Rotate all pages in a PDF document by 90, 180, or 270 degrees.',
+                icon: 'fa-rotate-right',
+                accept: 'application/pdf',
+                inputMultiple: false,
+                btnText: 'Apply Rotation & Download'
+            }
+        };
+
+        // Initialize Events
+        document.addEventListener('DOMContentLoaded', () => {
+            setupDropzoneEvents();
+            switchTool('merge');
+        });
+
+        // Switch Active Tool Mode
+        function switchTool(toolKey) {
+            currentTool = toolKey;
+            selectedFiles = [];
+            clearStatus();
+
+            // Update Tabs UI
+            document.querySelectorAll('.tool-tab').forEach(tab => {
+                tab.className = 'tool-tab flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all';
+            });
+            const activeTab = document.getElementById(`tab-${toolKey}`);
+            if (activeTab) {
+                activeTab.className = 'tool-tab flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all bg-brand-600 text-white shadow-md';
+            }
+
+            // Update Tool Details
+            const meta = toolMeta[toolKey];
+            document.getElementById('tool-title').innerHTML = `<i class="fa-solid ${meta.icon} text-brand-400"></i> ${meta.title}`;
+            document.getElementById('tool-desc').textContent = meta.desc;
+            fileInput.accept = meta.accept;
+            fileInput.multiple = meta.inputMultiple;
+
+            renderFileList();
+            renderToolOptions();
+            updateProcessButton();
+        }
+
+        // Setup Drag & Drop Handlers
+        function setupDropzoneEvents() {
+            dropzone.addEventListener('click', () => fileInput.click());
+
+            fileInput.addEventListener('change', (e) => {
+                handleFileSelection(Array.from(e.target.files));
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropzone.classList.add('drag-over');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropzone.classList.remove('drag-over');
+                }, false);
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                handleFileSelection(Array.from(dt.files));
+            });
+        }
+
+        // Handle Selected Files
+        function handleFileSelection(files) {
+            if (!files.length) return;
+
+            const meta = toolMeta[currentTool];
+            
+            // Single file enforcement for split/rotate
+            if (!meta.inputMultiple) {
+                selectedFiles = [files[0]];
+            } else {
+                selectedFiles = [...selectedFiles, ...files];
+            }
+
+            renderFileList();
+            renderToolOptions();
+            updateProcessButton();
+            clearStatus();
+        }
+
+        // Render Selected Files List
+        function renderFileList() {
+            fileList.innerHTML = '';
+            
+            if (selectedFiles.length === 0) {
+                fileListContainer.classList.add('hidden');
+                return;
+            }
+
+            fileListContainer.classList.remove('hidden');
+            fileCountSpan.textContent = selectedFiles.length;
+
+            selectedFiles.forEach((file, index) => {
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between p-3 rounded-xl bg-gray-900/90 border border-gray-800 text-sm';
+                item.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <div class="w-8 h-8 rounded-lg bg-gray-800 text-brand-400 flex items-center justify-center shrink-0">
+                            <i class="${file.type.includes('image') ? 'fa-regular fa-image' : 'fa-regular fa-file-pdf'}"></i>
+                        </div>
+                        <div class="truncate">
+                            <p class="text-white font-medium truncate">${file.name}</p>
+                            <p class="text-xs text-gray-500">${sizeMB} MB</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        ${currentTool === 'merge' || currentTool === 'img2pdf' ? `
+                            <button onclick="moveFile(${index}, -1)" ${index === 0 ? 'disabled class="opacity-30"' : ''} class="text-gray-400 hover:text-white p-1"><i class="fa-solid fa-arrow-up text-xs"></i></button>
+                            <button onclick="moveFile(${index}, 1)" ${index === selectedFiles.length - 1 ? 'disabled class="opacity-30"' : ''} class="text-gray-400 hover:text-white p-1"><i class="fa-solid fa-arrow-down text-xs"></i></button>
+                        ` : ''}
+                        <button onclick="removeFile(${index})" class="text-rose-400 hover:text-rose-300 p-1"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                `;
+                fileList.appendChild(item);
+            });
+        }
+
+        // Reorder Files
+        function moveFile(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= selectedFiles.length) return;
+            const temp = selectedFiles[index];
+            selectedFiles[index] = selectedFiles[newIndex];
+            selectedFiles[newIndex] = temp;
+            renderFileList();
+        }
+
+        // Remove Single File
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            renderFileList();
+            renderToolOptions();
+            updateProcessButton();
+        }
+
+        // Clear All Files
+        function clearFiles() {
+            selectedFiles = [];
+            fileInput.value = '';
+            renderFileList();
+            renderToolOptions();
+            updateProcessButton();
+            clearStatus();
+        }
+
+        // Dynamic Options UI per Tool
+        function renderToolOptions() {
+            if (selectedFiles.length === 0) {
+                toolOptions.classList.add('hidden');
+                return;
+            }
+
+            toolOptions.innerHTML = '';
+
+            if (currentTool === 'split') {
+                toolOptions.classList.remove('hidden');
+                toolOptions.innerHTML = `
+                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Extract Page Range</label>
+                    <input type="text" id="split-range" placeholder="e.g. 1-3, 5, 7-10" value="1" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+                    <p class="text-xs text-gray-500 mt-1">Specify pages or ranges separated by commas.</p>
+                `;
+            } else if (currentTool === 'rotate') {
+                toolOptions.classList.remove('hidden');
+                toolOptions.innerHTML = `
+                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">Select Rotation Angle</label>
+                    <select id="rotate-angle" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500">
+                        <option value="90">90° Clockwise</option>
+                        <option value="180">180° Flip</option>
+                        <option value="270">270° Counter-Clockwise</option>
+                    </select>
+                `;
+            } else {
+                toolOptions.classList.add('hidden');
+            }
+        }
+
+        // Enable/Disable Action Button
+        function updateProcessButton() {
+            const meta = toolMeta[currentTool];
+            if (selectedFiles.length > 0) {
+                processBtn.disabled = false;
+                processBtn.className = 'w-full sm:w-auto flex-1 py-3.5 px-6 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-brand-600/30 cursor-pointer';
+                btnText.textContent = meta.btnText;
+            } else {
+                processBtn.disabled = true;
+                processBtn.className = 'w-full sm:w-auto flex-1 py-3.5 px-6 rounded-xl bg-gray-800 text-gray-500 font-bold text-base flex items-center justify-center gap-2 cursor-not-allowed transition-all shadow-lg';
+                btnText.textContent = 'Select Files to Begin';
+            }
+        }
+
+        // Master PDF Processing Router
+        async function processPDF() {
+            if (!selectedFiles.length) return;
+
+            showStatus('Processing files locally in browser RAM...', 'info');
+            processBtn.disabled = true;
+            btnText.textContent = 'Processing...';
+
+            try {
+                if (currentTool === 'merge') {
+                    await executeMerge();
+                } else if (currentTool === 'img2pdf') {
+                    await executeImgToPdf();
+                } else if (currentTool === 'split') {
+                    await executeSplit();
+                } else if (currentTool === 'rotate') {
+                    await executeRotate();
+                }
+            } catch (err) {
+                console.error(err);
+                showStatus('Error processing PDF: ' + err.message, 'error');
+            } finally {
+                updateProcessButton();
+            }
+        }
+
+        // TOOL 1: MERGE PDFs
+        async function executeMerge() {
+            const mergedPdf = await PDFLib.PDFDocument.create();
+
+            for (const file of selectedFiles) {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await PDFLib.PDFDocument.load(arrayBuffer);
+                const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+                copiedPages.forEach((page) => mergedPdf.addPage(page));
+            }
+
+            const pdfBytes = await mergedPdf.save();
+            downloadFile(pdfBytes, 'pdffuse_merged.pdf', 'application/pdf');
+            showStatus('PDFs merged successfully!', 'success');
+        }
+
+        // TOOL 2: IMAGE TO PDF
+        async function executeImgToPdf() {
+            const pdfDoc = await PDFLib.PDFDocument.create();
+
+            for (const file of selectedFiles) {
+                const arrayBuffer = await file.arrayBuffer();
+                let image;
+
+                if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
+                    image = await pdfDoc.embedJpg(arrayBuffer);
+                } else if (file.type === 'image/png') {
+                    image = await pdfDoc.embedPng(arrayBuffer);
+                } else {
+                    continue; // Skip unsupported image formats
+                }
+
+                const page = pdfDoc.addPage([image.width, image.height]);
+                page.drawImage(image, {
+                    x: 0,
+                    y: 0,
+                    width: image.width,
+                    height: image.height,
+                });
+            }
+
+            const pdfBytes = await pdfDoc.save();
+            downloadFile(pdfBytes, 'pdffuse_converted.pdf', 'application/pdf');
+            showStatus('Images converted to PDF successfully!', 'success');
+        }
+
+        // TOOL 3: SPLIT / EXTRACT PAGES
+        async function executeSplit() {
+            const file = selectedFiles[0];
+            const arrayBuffer = await file.arrayBuffer();
+            const srcPdf = await PDFLib.PDFDocument.load(arrayBuffer);
+            const totalPages = srcPdf.getPageCount();
+
+            const rangeInput = document.getElementById('split-range').value;
+            const pageIndices = parsePageRanges(rangeInput, totalPages);
+
+            if (pageIndices.length === 0) {
+                throw new Error('Invalid page selection specified.');
+            }
+
+            const newPdf = await PDFLib.PDFDocument.create();
+            const copiedPages = await newPdf.copyPages(srcPdf, pageIndices);
+            copiedPages.forEach((page) => newPdf.addPage(page));
+
+            const pdfBytes = await newPdf.save();
+            downloadFile(pdfBytes, `pdffuse_extracted_pages.pdf`, 'application/pdf');
+            showStatus(`Successfully extracted ${pageIndices.length} page(s)!`, 'success');
+        }
+
+        // TOOL 4: ROTATE PDF
+        async function executeRotate() {
+            const file = selectedFiles[0];
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+
+            const angle = parseInt(document.getElementById('rotate-angle').value, 10);
+            const pages = pdfDoc.getPages();
+
+            pages.forEach((page) => {
+                const currentRotation = page.getRotation().angle;
+                page.setRotation(PDFLib.degrees((currentRotation + angle) % 360));
+            });
+
+            const pdfBytes = await pdfDoc.save();
+            downloadFile(pdfBytes, 'pdffuse_rotated.pdf', 'application/pdf');
+            showStatus(`Rotated ${pages.length} pages by ${angle}°!`, 'success');
+        }
+
+        // Helper: Parse Page Range String (e.g. "1-3, 5")
+        function parsePageRanges(input, maxPages) {
+            const indices = new Set();
+            const parts = input.split(',');
+
+            parts.forEach(part => {
+                const trim = part.trim();
+                if (trim.includes('-')) {
+                    const [start, end] = trim.split('-').map(num => parseInt(num, 10));
+                    if (!isNaN(start) && !isNaN(end)) {
+                        for (let i = Math.max(1, start); i <= Math.min(maxPages, end); i++) {
+                            indices.add(i - 1);
+                        }
+                    }
+                } else {
+                    const page = parseInt(trim, 10);
+                    if (!isNaN(page) && page >= 1 && page <= maxPages) {
+                        indices.add(page - 1);
+                    }
+                }
+            });
+
+            return Array.from(indices).sort((a, b) => a - b);
+        }
+
+        // Helper: Trigger Browser Download
+        function downloadFile(data, filename, type) {
+            const blob = new Blob([data], { type: type });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Helper: Show Feedback Status
+        function showStatus(message, type) {
+            statusBox.classList.remove('hidden', 'bg-emerald-500/10', 'text-emerald-400', 'bg-rose-500/10', 'text-rose-400', 'bg-brand-500/10', 'text-brand-400');
+            
+            if (type === 'success') {
+                statusBox.classList.add('bg-emerald-500/10', 'text-emerald-400');
+                statusBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${message}</span>`;
+            } else if (type === 'error') {
+                statusBox.classList.add('bg-rose-500/10', 'text-rose-400');
+                statusBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>${message}</span>`;
+            } else {
+                statusBox.classList.add('bg-brand-500/10', 'text-brand-400');
+                statusBox.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>${message}</span>`;
+            }
+        }
+
+        function clearStatus() {
+            statusBox.classList.add('hidden');
+        }
+
+        function scrollToTool() {
+            document.getElementById('tool-studio').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
