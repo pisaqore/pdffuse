@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDFFuse | 100% Private, Client-Side Online PDF Utility Suite</title>
+    
+    <!-- SEO Meta Etiketleri -->
+    <meta name="description" content="Merge, split, rotate, and convert images to PDF instantly in your browser. 100% private with zero server uploads—files never leave your device.">
+    <meta name="keywords" content="pdf merger, client side pdf, private pdf tools, image to pdf, split pdf, rotate pdf, free pdf joiner">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://pdffuse.com">
+
+    <!-- Open Graph / Sosyal Medya -->
+    <meta property="og:title" content="PDFFuse - 100% Private, Free Online PDF Tools">
+    <meta property="og:description" content="Process PDFs directly in your browser. Maximum privacy, zero server uploads, and lightning-fast speeds.">
+    <meta property="og:url" content="https://pdffuse.com">
+    <meta property="og:type" content="website">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -62,20 +75,10 @@
             border-color: #6366f1;
             background: rgba(99, 102, 241, 0.05);
         }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0B0F17;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1F2937;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #374151;
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0B0F17; }
+        ::-webkit-scrollbar-thumb { background: #1F2937; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased selection:bg-brand-500 selection:text-white">
@@ -83,21 +86,16 @@
     <!-- Header / Navbar -->
     <header class="sticky top-0 z-50 glass-panel border-b border-gray-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <!-- Brand Logo -->
             <a href="#" class="flex items-center gap-3 group">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-purple-500 flex items-center justify-center shadow-lg shadow-brand-500/20 group-hover:scale-105 transition-transform">
                     <i class="fa-solid fa-layer-group text-white text-xl"></i>
                 </div>
                 <span class="text-2xl font-extrabold tracking-tight text-white">PDF<span class="gradient-text">Fuse</span></span>
             </a>
-
-            <!-- Privacy Badge (Desktop) -->
             <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
                 <i class="fa-solid fa-shield-halved"></i>
                 <span>100% Client-Side Private</span>
             </div>
-
-            <!-- Header Nav -->
             <nav class="flex items-center gap-4">
                 <a href="#features" class="hidden sm:inline-block text-sm text-gray-400 hover:text-white transition-colors">Features</a>
                 <a href="#faq" class="hidden sm:inline-block text-sm text-gray-400 hover:text-white transition-colors">FAQ</a>
@@ -110,10 +108,7 @@
 
     <!-- Main Container -->
     <main class="flex-grow">
-
-        <!-- Hero Section -->
         <section class="relative pt-12 pb-8 md:pt-20 md:pb-12 px-4 max-w-7xl mx-auto text-center">
-            <!-- Background Glow -->
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-brand-500/10 blur-[120px] rounded-full pointer-events-none"></div>
 
             <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs sm:text-sm font-medium mb-6">
@@ -147,10 +142,8 @@
                 </div>
             </div>
 
-            <!-- Main Interactive Tool Studio Card -->
+            <!-- Main Tool Studio Card -->
             <div class="max-w-4xl mx-auto glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl text-left border border-gray-800/80">
-
-                <!-- Dynamic Title & Description -->
                 <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-800 pb-4">
                     <div>
                         <h2 id="tool-title" class="text-xl font-bold text-white flex items-center gap-2">
@@ -161,7 +154,6 @@
                     <span class="text-xs px-2.5 py-1 rounded-lg bg-gray-800 text-gray-400 w-max font-mono border border-gray-700">Client-Side Engine</span>
                 </div>
 
-                <!-- Interactive File Dropzone -->
                 <div id="dropzone" class="file-dropzone rounded-2xl p-8 sm:p-12 text-center cursor-pointer flex flex-col items-center justify-center group mb-6">
                     <input type="file" id="file-input" class="hidden" multiple accept="application/pdf">
                     <div class="w-16 h-16 rounded-2xl bg-brand-500/10 text-brand-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -171,32 +163,23 @@
                     <p id="file-types-label" class="text-xs text-gray-400">Supports PDF files up to any size (RAM Limited)</p>
                 </div>
 
-                <!-- Selected Files List Container -->
                 <div id="file-list-container" class="hidden space-y-3 mb-6">
                     <div class="flex items-center justify-between text-xs text-gray-400 px-1 font-semibold uppercase tracking-wider">
                         <span>Selected Items (<span id="file-count">0</span>)</span>
                         <button onclick="clearFiles()" class="text-rose-400 hover:text-rose-300 transition-colors">Clear All</button>
                     </div>
-                    <div id="file-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
-                        <!-- Dynamic file items injected here -->
-                    </div>
+                    <div id="file-list" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
                 </div>
 
-                <!-- Tool Specific Options Panel -->
-                <div id="tool-options" class="hidden bg-gray-900/60 rounded-xl p-4 border border-gray-800/80 mb-6 space-y-4">
-                    <!-- Dynamic Options Injected via JS -->
-                </div>
+                <div id="tool-options" class="hidden bg-gray-900/60 rounded-xl p-4 border border-gray-800/80 mb-6 space-y-4"></div>
 
-                <!-- Process Action Button & Progress -->
                 <div class="flex flex-col sm:flex-row items-center gap-4">
                     <button id="process-btn" onclick="processPDF()" disabled class="w-full sm:w-auto flex-1 py-3.5 px-6 rounded-xl bg-gray-800 text-gray-500 font-bold text-base flex items-center justify-center gap-2 cursor-not-allowed transition-all shadow-lg">
                         <i class="fa-solid fa-bolt"></i> <span id="btn-text">Select Files to Begin</span>
                     </button>
                 </div>
 
-                <!-- Status / Error Alert Box -->
                 <div id="status-box" class="hidden mt-4 p-4 rounded-xl text-sm flex items-center gap-3"></div>
-
             </div>
         </section>
 
@@ -239,7 +222,6 @@
                 <h2 class="text-3xl font-bold text-white mb-3">Designed for Speed and Privacy</h2>
                 <p class="text-gray-400 max-w-xl mx-auto text-sm sm:text-base">A complete document utility suite that operates with zero backend infrastructure costs.</p>
             </div>
-
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div class="glass-panel p-6 rounded-2xl border border-gray-800 hover:border-gray-700 transition-colors">
                     <div class="w-10 h-10 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center mb-4">
@@ -278,7 +260,6 @@
                 <h2 class="text-3xl font-bold text-white mb-2">Frequently Asked Questions</h2>
                 <p class="text-gray-400 text-sm">Everything you need to know about our browser-native processing.</p>
             </div>
-
             <div class="space-y-4">
                 <details class="glass-panel rounded-2xl p-5 border border-gray-800 group cursor-pointer">
                     <summary class="font-semibold text-white flex justify-between items-center list-none">
@@ -289,7 +270,6 @@
                         No, absolutely not. PDFFuse operates entirely inside your web browser using JavaScript and client-side libraries. Your files are processed in your device's memory (RAM) and are never transmitted over the internet.
                     </p>
                 </details>
-
                 <details class="glass-panel rounded-2xl p-5 border border-gray-800 group cursor-pointer">
                     <summary class="font-semibold text-white flex justify-between items-center list-none">
                         <span>Is there a file size or daily document limit?</span>
@@ -299,7 +279,6 @@
                         Unlike traditional SaaS tools that charge for large files, PDFFuse has no artificial limits. The only restriction is the amount of RAM available on your smartphone or computer.
                     </p>
                 </details>
-
                 <details class="glass-panel rounded-2xl p-5 border border-gray-800 group cursor-pointer">
                     <summary class="font-semibold text-white flex justify-between items-center list-none">
                         <span>Does PDFFuse work on mobile devices?</span>
@@ -311,7 +290,6 @@
                 </details>
             </div>
         </section>
-
     </main>
 
     <!-- Footer -->
@@ -334,11 +312,9 @@
 
     <!-- App Logic Script -->
     <script>
-        // State Management
         let currentTool = 'merge';
         let selectedFiles = [];
 
-        // DOM Element References
         const dropzone = document.getElementById('dropzone');
         const fileInput = document.getElementById('file-input');
         const fileList = document.getElementById('file-list');
@@ -349,55 +325,27 @@
         const statusBox = document.getElementById('status-box');
         const toolOptions = document.getElementById('tool-options');
 
-        // Tool Configs
         const toolMeta = {
-            merge: {
-                title: 'Merge Multiple PDFs',
-                desc: 'Combine multiple PDF files into a single structured document instantly.',
-                icon: 'fa-code-merge',
-                accept: 'application/pdf',
-                inputMultiple: true,
-                btnText: 'Merge & Download PDF'
-            },
-            img2pdf: {
-                title: 'Convert Images to PDF',
-                desc: 'Convert JPG or PNG images into a clean single PDF file.',
-                icon: 'fa-image',
-                accept: 'image/jpeg, image/png, image/webp',
-                inputMultiple: true,
-                btnText: 'Convert Images to PDF'
-            },
-            split: {
-                title: 'Split / Extract Pages',
-                desc: 'Extract specific pages from a PDF document into a new file.',
-                icon: 'fa-scissors',
-                accept: 'application/pdf',
-                inputMultiple: false,
-                btnText: 'Extract Pages & Download'
-            },
-            rotate: {
-                title: 'Rotate PDF Document',
-                desc: 'Rotate all pages in a PDF document by 90, 180, or 270 degrees.',
-                icon: 'fa-rotate-right',
-                accept: 'application/pdf',
-                inputMultiple: false,
-                btnText: 'Apply Rotation & Download'
-            }
+            merge: { title: 'Merge Multiple PDFs', desc: 'Combine multiple PDF files into a single structured document instantly.', icon: 'fa-code-merge', accept: 'application/pdf', inputMultiple: true, btnText: 'Merge & Download PDF' },
+            img2pdf: { title: 'Convert Images to PDF', desc: 'Convert JPG or PNG images into a clean single PDF file.', icon: 'fa-image', accept: 'image/jpeg, image/png, image/webp', inputMultiple: true, btnText: 'Convert Images to PDF' },
+            split: { title: 'Split / Extract Pages', desc: 'Extract specific pages from a PDF document into a new file.', icon: 'fa-scissors', accept: 'application/pdf', inputMultiple: false, btnText: 'Extract Pages & Download' },
+            rotate: { title: 'Rotate PDF Document', desc: 'Rotate all pages in a PDF document by 90, 180, or 270 degrees.', icon: 'fa-rotate-right', accept: 'application/pdf', inputMultiple: false, btnText: 'Apply Rotation & Download' }
         };
 
-        // Initialize Events
         document.addEventListener('DOMContentLoaded', () => {
             setupDropzoneEvents();
             switchTool('merge');
         });
 
-        // Switch Active Tool Mode
+        function scrollToTool() {
+            document.getElementById('tool-studio').scrollIntoView({ behavior: 'smooth' });
+        }
+
         function switchTool(toolKey) {
             currentTool = toolKey;
             selectedFiles = [];
             clearStatus();
 
-            // Update Tabs UI
             document.querySelectorAll('.tool-tab').forEach(tab => {
                 tab.className = 'tool-tab flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-gray-400 hover:text-white hover:bg-gray-800/50 transition-all';
             });
@@ -406,7 +354,6 @@
                 activeTab.className = 'tool-tab flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all bg-brand-600 text-white shadow-md';
             }
 
-            // Update Tool Details
             const meta = toolMeta[toolKey];
             document.getElementById('tool-title').innerHTML = `<i class="fa-solid ${meta.icon} text-brand-400"></i> ${meta.title}`;
             document.getElementById('tool-desc').textContent = meta.desc;
@@ -418,62 +365,41 @@
             updateProcessButton();
         }
 
-        // Setup Drag & Drop Handlers
         function setupDropzoneEvents() {
             dropzone.addEventListener('click', () => fileInput.click());
-
-            fileInput.addEventListener('change', (e) => {
-                handleFileSelection(Array.from(e.target.files));
-            });
+            fileInput.addEventListener('change', (e) => handleFileSelection(Array.from(e.target.files)));
 
             ['dragenter', 'dragover'].forEach(eventName => {
-                dropzone.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    dropzone.classList.add('drag-over');
-                }, false);
+                dropzone.addEventListener(eventName, (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); }, false);
             });
-
             ['dragleave', 'drop'].forEach(eventName => {
-                dropzone.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    dropzone.classList.remove('drag-over');
-                }, false);
+                dropzone.addEventListener(eventName, (e) => { e.preventDefault(); dropzone.classList.remove('drag-over'); }, false);
             });
-
             dropzone.addEventListener('drop', (e) => {
-                const dt = e.dataTransfer;
-                handleFileSelection(Array.from(dt.files));
+                handleFileSelection(Array.from(e.dataTransfer.files));
             });
         }
 
-        // Handle Selected Files
         function handleFileSelection(files) {
             if (!files.length) return;
-
             const meta = toolMeta[currentTool];
-            
-            // Single file enforcement for split/rotate
             if (!meta.inputMultiple) {
                 selectedFiles = [files[0]];
             } else {
                 selectedFiles = [...selectedFiles, ...files];
             }
-
             renderFileList();
             renderToolOptions();
             updateProcessButton();
             clearStatus();
         }
 
-        // Render Selected Files List
         function renderFileList() {
             fileList.innerHTML = '';
-            
             if (selectedFiles.length === 0) {
                 fileListContainer.classList.add('hidden');
                 return;
             }
-
             fileListContainer.classList.remove('hidden');
             fileCountSpan.textContent = selectedFiles.length;
 
@@ -503,7 +429,6 @@
             });
         }
 
-        // Reorder Files
         function moveFile(index, direction) {
             const newIndex = index + direction;
             if (newIndex < 0 || newIndex >= selectedFiles.length) return;
@@ -513,7 +438,6 @@
             renderFileList();
         }
 
-        // Remove Single File
         function removeFile(index) {
             selectedFiles.splice(index, 1);
             renderFileList();
@@ -521,7 +445,6 @@
             updateProcessButton();
         }
 
-        // Clear All Files
         function clearFiles() {
             selectedFiles = [];
             fileInput.value = '';
@@ -531,15 +454,12 @@
             clearStatus();
         }
 
-        // Dynamic Options UI per Tool
         function renderToolOptions() {
             if (selectedFiles.length === 0) {
                 toolOptions.classList.add('hidden');
                 return;
             }
-
             toolOptions.innerHTML = '';
-
             if (currentTool === 'split') {
                 toolOptions.classList.remove('hidden');
                 toolOptions.innerHTML = `
@@ -562,7 +482,6 @@
             }
         }
 
-        // Enable/Disable Action Button
         function updateProcessButton() {
             const meta = toolMeta[currentTool];
             if (selectedFiles.length > 0) {
@@ -576,10 +495,8 @@
             }
         }
 
-        // Master PDF Processing Router
         async function processPDF() {
             if (!selectedFiles.length) return;
-
             showStatus('Processing files locally in browser RAM...', 'info');
             processBtn.disabled = true;
             btnText.textContent = 'Processing...';
@@ -602,122 +519,95 @@
             }
         }
 
-        // TOOL 1: MERGE PDFs
         async function executeMerge() {
-            const mergedPdf = await PDFLib.PDFDocument.create();
-
+            const { PDFDocument } = PDFLib;
+            const mergedPdf = await PDFDocument.create();
             for (const file of selectedFiles) {
                 const arrayBuffer = await file.arrayBuffer();
-                const pdf = await PDFLib.PDFDocument.load(arrayBuffer);
+                const pdf = await PDFDocument.load(arrayBuffer);
                 const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
                 copiedPages.forEach((page) => mergedPdf.addPage(page));
             }
-
             const pdfBytes = await mergedPdf.save();
             downloadFile(pdfBytes, 'pdffuse_merged.pdf', 'application/pdf');
             showStatus('PDFs merged successfully!', 'success');
         }
 
-        // TOOL 2: IMAGE TO PDF
         async function executeImgToPdf() {
-            const pdfDoc = await PDFLib.PDFDocument.create();
-
+            const { PDFDocument } = PDFLib;
+            const pdfDoc = await PDFDocument.create();
             for (const file of selectedFiles) {
                 const arrayBuffer = await file.arrayBuffer();
                 let image;
-
-                if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
-                    image = await pdfDoc.embedJpg(arrayBuffer);
-                } else if (file.type === 'image/png') {
+                if (file.type.includes('png')) {
                     image = await pdfDoc.embedPng(arrayBuffer);
                 } else {
-                    continue; // Skip unsupported image formats
+                    image = await pdfDoc.embedJpg(arrayBuffer);
                 }
-
                 const page = pdfDoc.addPage([image.width, image.height]);
-                page.drawImage(image, {
-                    x: 0,
-                    y: 0,
-                    width: image.width,
-                    height: image.height,
-                });
+                page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
             }
-
             const pdfBytes = await pdfDoc.save();
             downloadFile(pdfBytes, 'pdffuse_converted.pdf', 'application/pdf');
             showStatus('Images converted to PDF successfully!', 'success');
         }
 
-        // TOOL 3: SPLIT / EXTRACT PAGES
         async function executeSplit() {
+            const { PDFDocument } = PDFLib;
             const file = selectedFiles[0];
             const arrayBuffer = await file.arrayBuffer();
-            const srcPdf = await PDFLib.PDFDocument.load(arrayBuffer);
-            const totalPages = srcPdf.getPageCount();
+            const pdf = await PDFDocument.load(arrayBuffer);
+            const rangeStr = document.getElementById('split-range').value;
+            const pageIndices = parsePageRange(rangeStr, pdf.getPageCount());
 
-            const rangeInput = document.getElementById('split-range').value;
-            const pageIndices = parsePageRanges(rangeInput, totalPages);
-
-            if (pageIndices.length === 0) {
-                throw new Error('Invalid page selection specified.');
-            }
-
-            const newPdf = await PDFLib.PDFDocument.create();
-            const copiedPages = await newPdf.copyPages(srcPdf, pageIndices);
-            copiedPages.forEach((page) => newPdf.addPage(page));
+            const newPdf = await PDFDocument.create();
+            const copiedPages = await newPdf.copyPages(pdf, pageIndices);
+            copiedPages.forEach(p => newPdf.addPage(p));
 
             const pdfBytes = await newPdf.save();
-            downloadFile(pdfBytes, `pdffuse_extracted_pages.pdf`, 'application/pdf');
-            showStatus(`Successfully extracted ${pageIndices.length} page(s)!`, 'success');
+            downloadFile(pdfBytes, 'pdffuse_extracted_pages.pdf', 'application/pdf');
+            showStatus('Pages extracted successfully!', 'success');
         }
 
-        // TOOL 4: ROTATE PDF
         async function executeRotate() {
+            const { PDFDocument } = PDFLib;
             const file = selectedFiles[0];
             const arrayBuffer = await file.arrayBuffer();
-            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+            const pdf = await PDFDocument.load(arrayBuffer);
+            const angle = parseInt(document.getElementById('rotate-angle').value);
 
-            const angle = parseInt(document.getElementById('rotate-angle').value, 10);
-            const pages = pdfDoc.getPages();
-
-            pages.forEach((page) => {
+            pdf.getPages().forEach(page => {
                 const currentRotation = page.getRotation().angle;
-                page.setRotation(PDFLib.degrees((currentRotation + angle) % 360));
+                page.setRotation({ angle: (currentRotation + angle) % 360 });
             });
 
-            const pdfBytes = await pdfDoc.save();
+            const pdfBytes = await pdf.save();
             downloadFile(pdfBytes, 'pdffuse_rotated.pdf', 'application/pdf');
-            showStatus(`Rotated ${pages.length} pages by ${angle}°!`, 'success');
+            showStatus('PDF rotated successfully!', 'success');
         }
 
-        // Helper: Parse Page Range String (e.g. "1-3, 5")
-        function parsePageRanges(input, maxPages) {
-            const indices = new Set();
-            const parts = input.split(',');
-
+        function parsePageRange(str, maxPages) {
+            const indices = [];
+            const parts = str.split(',');
             parts.forEach(part => {
-                const trim = part.trim();
-                if (trim.includes('-')) {
-                    const [start, end] = trim.split('-').map(num => parseInt(num, 10));
-                    if (!isNaN(start) && !isNaN(end)) {
-                        for (let i = Math.max(1, start); i <= Math.min(maxPages, end); i++) {
-                            indices.add(i - 1);
-                        }
+                part = part.trim();
+                if (part.includes('-')) {
+                    const [start, end] = part.split('-').map(num => parseInt(num.trim()) - 1);
+                    for (let i = Math.max(0, start); i <= Math.min(maxPages - 1, end); i++) {
+                        if (!indices.includes(i)) indices.push(i);
                     }
                 } else {
-                    const page = parseInt(trim, 10);
-                    if (!isNaN(page) && page >= 1 && page <= maxPages) {
-                        indices.add(page - 1);
+                    const pageNum = parseInt(part) - 1;
+                    if (pageNum >= 0 && pageNum < maxPages && !indices.includes(pageNum)) {
+                        indices.push(pageNum);
                     }
                 }
             });
-
-            return Array.from(indices).sort((a, b) => a - b);
+            return indices.length ? indices : [0];
         }
 
-        // Helper: Trigger Browser Download
-        function downloadFile(data, filename, type) {
-            const blob = new Blob([data], { type: type });
+        function downloadFile(bytes, filename, mimeType) {
+            const blob = new Blob([bytes], { type: mimeType });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = filename;
@@ -726,28 +616,22 @@
             document.body.removeChild(link);
         }
 
-        // Helper: Show Feedback Status
         function showStatus(message, type) {
-            statusBox.classList.remove('hidden', 'bg-emerald-500/10', 'text-emerald-400', 'bg-rose-500/10', 'text-rose-400', 'bg-brand-500/10', 'text-brand-400');
-            
+            statusBox.classList.remove('hidden', 'bg-emerald-500/10', 'text-emerald-400', 'border-emerald-500/20', 'bg-rose-500/10', 'text-rose-400', 'border-rose-500/20', 'bg-brand-500/10', 'text-brand-400', 'border-brand-500/20');
             if (type === 'success') {
-                statusBox.classList.add('bg-emerald-500/10', 'text-emerald-400');
-                statusBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${message}</span>`;
+                statusBox.classList.add('bg-emerald-500/10', 'text-emerald-400', 'border', 'border-emerald-500/20');
+                statusBox.innerHTML = `<i class="fa-solid fa-circle-check text-lg"></i> <span>${message}</span>`;
             } else if (type === 'error') {
-                statusBox.classList.add('bg-rose-500/10', 'text-rose-400');
-                statusBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>${message}</span>`;
+                statusBox.classList.add('bg-rose-500/10', 'text-rose-400', 'border', 'border-rose-500/20');
+                statusBox.innerHTML = `<i class="fa-solid fa-circle-exclamation text-lg"></i> <span>${message}</span>`;
             } else {
-                statusBox.classList.add('bg-brand-500/10', 'text-brand-400');
-                statusBox.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>${message}</span>`;
+                statusBox.classList.add('bg-brand-500/10', 'text-brand-400', 'border', 'border-brand-500/20');
+                statusBox.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-lg"></i> <span>${message}</span>`;
             }
         }
 
         function clearStatus() {
             statusBox.classList.add('hidden');
-        }
-
-        function scrollToTool() {
-            document.getElementById('tool-studio').scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </body>
