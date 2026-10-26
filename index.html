@@ -6,8 +6,8 @@
     <title>PDFFuse | Private, Client-Side Online PDF Utility Suite</title>
 
     <!-- SEO -->
-    <meta name="description" content="Merge, split, rotate, and convert images to PDF instantly in your browser. Your files are never uploaded to a server.">
-    <meta name="keywords" content="pdf merger, client side pdf, private pdf tools, image to pdf, split pdf, rotate pdf, free pdf joiner">
+    <meta name="description" content="Merge, split, rotate, watermark, manage pages, and convert PDFs and images instantly in your browser. Your files are never uploaded to a server.">
+    <meta name="keywords" content="pdf merger, client side pdf, private pdf tools, image to pdf, split pdf, rotate pdf, watermark pdf, pdf to images, page manager">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://pdffuse.com">
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234f46e5'/%3E%3Ctext x='50' y='68' font-size='56' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3EF%3C/text%3E%3C/svg%3E">
@@ -20,21 +20,24 @@
     <meta property="og:image" content="https://pdffuse.com/og-image.png">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="PDFFuse - Private, Free Online PDF Tools">
-    <meta name="twitter:description" content="Merge, split, rotate and convert PDFs without uploading anything.">
+    <meta name="twitter:description" content="Merge, split, rotate, watermark and convert PDFs without uploading anything.">
     <meta name="twitter:image" content="https://pdffuse.com/og-image.png">
 
     <script type="application/ld+json">
-    {"@context":"https://schema.org","@type":"SoftwareApplication","name":"PDFFuse","url":"https://pdffuse.com","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (web browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Merge, split, rotate PDFs and convert images to PDF in your browser without uploading files."}
+    {"@context":"https://schema.org","@type":"SoftwareApplication","name":"PDFFuse","url":"https://pdffuse.com","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (web browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Merge, split, rotate and watermark PDFs, reorder pages, convert PDFs to images and images to PDF in your browser without uploading files.","featureList":["Merge PDF","Split PDF","Rotate PDF","Watermark PDF","PDF to images","Visual page manager","Image to PDF"]}
     </script>
 
     <!-- TODO (production): replace the Tailwind Play CDN with a built CSS file (npx tailwindcss -o styles.css --minify) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- TODO (production): self-host pdf-lib, or add an integrity (SRI) attribute -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 
+    <!-- TODO (production): self-host these libraries or add integrity (SRI) attributes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         tailwind.config = {
             darkMode: 'class',
             theme: { extend: {
@@ -49,6 +52,8 @@
         .glass-panel { background:rgba(17,24,39,.7); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.08); }
         .file-dropzone { border:2px dashed rgba(99,102,241,.4); transition:all .2s ease-in-out; }
         .file-dropzone:hover, .file-dropzone.drag-over, .file-dropzone:focus-visible { border-color:#6366f1; background:rgba(99,102,241,.05); outline:none; }
+        .page-card.dragging { opacity:.4; }
+        .page-card.drag-target { border-color:#6366f1; }
         ::-webkit-scrollbar { width:8px; }
         ::-webkit-scrollbar-track { background:#0B0F17; }
         ::-webkit-scrollbar-thumb { background:#1F2937; border-radius:4px; }
@@ -90,15 +95,18 @@
             </h1>
 
             <p class="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
-                Merge, convert, split, and rotate PDFs. Your files never reach a server or database—they are processed entirely on your device.
+                Merge, split, rotate, watermark, and convert PDFs instantly. Your files never reach a server—they are processed entirely on your device.
             </p>
 
-            <div id="tool-studio" class="max-w-4xl mx-auto mb-6">
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 rounded-2xl bg-gray-900/80 border border-gray-800" role="tablist">
-                    <button role="tab" onclick="switchTool('merge')" id="tab-merge" class="tool-tab"><i class="fa-solid fa-code-merge"></i> Merge PDFs</button>
-                    <button role="tab" onclick="switchTool('img2pdf')" id="tab-img2pdf" class="tool-tab"><i class="fa-regular fa-image"></i> Image to PDF</button>
-                    <button role="tab" onclick="switchTool('split')" id="tab-split" class="tool-tab"><i class="fa-solid fa-scissors"></i> Split / Extract</button>
-                    <button role="tab" onclick="switchTool('rotate')" id="tab-rotate" class="tool-tab"><i class="fa-solid fa-rotate-right"></i> Rotate PDF</button>
+            <div id="tool-studio" class="max-w-5xl mx-auto mb-6">
+                <div class="flex flex-wrap justify-center gap-2 p-1.5 rounded-2xl bg-gray-900/80 border border-gray-800" role="tablist">
+                    <button role="tab" onclick="switchTool('merge')" id="tab-merge"><i class="fa-solid fa-code-merge"></i> Merge</button>
+                    <button role="tab" onclick="switchTool('img2pdf')" id="tab-img2pdf"><i class="fa-regular fa-image"></i> Img to PDF</button>
+                    <button role="tab" onclick="switchTool('split')" id="tab-split"><i class="fa-solid fa-scissors"></i> Split</button>
+                    <button role="tab" onclick="switchTool('rotate')" id="tab-rotate"><i class="fa-solid fa-rotate-right"></i> Rotate</button>
+                    <button role="tab" onclick="switchTool('watermark')" id="tab-watermark"><i class="fa-solid fa-stamp"></i> Watermark</button>
+                    <button role="tab" onclick="switchTool('pdf2img')" id="tab-pdf2img"><i class="fa-solid fa-images"></i> PDF to Img</button>
+                    <button role="tab" onclick="switchTool('pages')" id="tab-pages"><i class="fa-solid fa-file-lines"></i> Page Manager</button>
                 </div>
             </div>
 
@@ -122,10 +130,11 @@
 
                 <div id="file-list-container" class="hidden space-y-3 mb-6">
                     <div class="flex items-center justify-between text-xs text-gray-400 px-1 font-semibold uppercase tracking-wider">
-                        <span>Selected Items (<span id="file-count">0</span>)</span>
+                        <span><span id="list-label">Selected Items</span> (<span id="file-count">0</span>)</span>
                         <button onclick="clearFiles()" class="text-rose-400 hover:text-rose-300 transition-colors">Clear All</button>
                     </div>
-                    <div id="file-list" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+                    <p id="list-hint" class="hidden text-xs text-gray-500 px-1"></p>
+                    <div id="file-list"></div>
                 </div>
 
                 <div id="tool-options" class="hidden bg-gray-900/60 rounded-xl p-4 border border-gray-800/80 mb-6 space-y-4"></div>
@@ -146,21 +155,21 @@
                     <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-user-shield text-xl"></i></div>
                     <div>
                         <h4 class="text-white font-bold mb-1">Your Files Stay on Your Device</h4>
-                        <p class="text-gray-400 text-sm leading-relaxed">Merging, splitting and converting all happen in your browser's memory. Your documents are never sent to our servers.</p>
+                        <p class="text-gray-400 text-sm leading-relaxed">All operations happen in your browser's memory. Your documents are never sent to our servers.</p>
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-brand-500/10 text-brand-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-gauge-high text-xl"></i></div>
                     <div>
                         <h4 class="text-white font-bold mb-1">No Upload Queues, No Size Caps</h4>
-                        <p class="text-gray-400 text-sm leading-relaxed">There are no upload waits or artificial file limits. Very large files are only limited by your device's memory.</p>
+                        <p class="text-gray-400 text-sm leading-relaxed">There are no upload waits or artificial file limits. Large files are handled right on your machine.</p>
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
                     <div class="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-user-slash text-xl"></i></div>
                     <div>
                         <h4 class="text-white font-bold mb-1">No Sign-Up, No Watermarks</h4>
-                        <p class="text-gray-400 text-sm leading-relaxed">Open the page, drop your files, download the result. No account and nothing added to your documents.</p>
+                        <p class="text-gray-400 text-sm leading-relaxed">Open the page, drop your files, download the result instantly without accounts or hidden fees.</p>
                     </div>
                 </div>
             </div>
@@ -169,7 +178,7 @@
         <section id="features" class="py-12 max-w-7xl mx-auto px-4">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-white mb-3">Designed for Speed and Privacy</h2>
-                <p class="text-gray-400 max-w-xl mx-auto text-sm sm:text-base">A complete document utility suite that runs without any backend.</p>
+                <p class="text-gray-400 max-w-xl mx-auto text-sm sm:text-base">A complete document utility suite running entirely without a backend.</p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div class="glass-panel p-6 rounded-2xl border border-gray-800 hover:border-gray-700 transition-colors">
@@ -192,6 +201,26 @@
                     <h3 class="text-white font-bold mb-2">Rotation Corrector</h3>
                     <p class="text-gray-400 text-xs leading-relaxed">Fix upside-down or sideways scans with 90°, 180°, or 270° rotations.</p>
                 </div>
+                <div class="glass-panel p-6 rounded-2xl border border-gray-800 hover:border-gray-700 transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-4"><i class="fa-solid fa-stamp"></i></div>
+                    <h3 class="text-white font-bold mb-2">PDF Watermark</h3>
+                    <p class="text-gray-400 text-xs leading-relaxed">Stamp a centered, auto-sized diagonal text watermark on every page with adjustable opacity.</p>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl border border-gray-800 hover:border-gray-700 transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-pink-500/10 text-pink-400 flex items-center justify-center mb-4"><i class="fa-solid fa-images"></i></div>
+                    <h3 class="text-white font-bold mb-2">PDF to Images</h3>
+                    <p class="text-gray-400 text-xs leading-relaxed">Turn every page into a high-resolution PNG, delivered as a single ZIP for multi-page files.</p>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl border border-gray-800 hover:border-gray-700 transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center mb-4"><i class="fa-solid fa-file-lines"></i></div>
+                    <h3 class="text-white font-bold mb-2">Visual Page Manager</h3>
+                    <p class="text-gray-400 text-xs leading-relaxed">See page thumbnails, drag to reorder, and delete pages you don't need.</p>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl border border-gray-800 hover:border-gray-700 transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-4"><i class="fa-solid fa-lock"></i></div>
+                    <h3 class="text-white font-bold mb-2">Private by Design</h3>
+                    <p class="text-gray-400 text-xs leading-relaxed">No accounts, no uploads. Your documents are processed in memory and never leave your device.</p>
+                </div>
             </div>
         </section>
 
@@ -213,14 +242,14 @@
                         <span>Is there a file size or daily document limit?</span>
                         <i class="fa-solid fa-chevron-down text-gray-500 group-open:rotate-180 transition-transform"></i>
                     </summary>
-                    <p class="text-gray-400 text-sm mt-3 leading-relaxed">PDFFuse sets no limits of its own. The practical limit is the memory available on your phone or computer, and very large files may make the page slow for a while.</p>
+                    <p class="text-gray-400 text-sm mt-3 leading-relaxed">PDFFuse sets no limits of its own. The practical limit is the memory available on your phone or computer.</p>
                 </details>
                 <details class="glass-panel rounded-2xl p-5 border border-gray-800 group cursor-pointer">
                     <summary class="font-semibold text-white flex justify-between items-center list-none">
                         <span>Does PDFFuse work on mobile devices?</span>
                         <i class="fa-solid fa-chevron-down text-gray-500 group-open:rotate-180 transition-transform"></i>
                     </summary>
-                    <p class="text-gray-400 text-sm mt-3 leading-relaxed">Yes. The layout is responsive, so you can merge, rotate, or convert PDFs from an iPhone, iPad, or Android device.</p>
+                    <p class="text-gray-400 text-sm mt-3 leading-relaxed">Yes. The layout is responsive, so you can manage and convert PDFs from iOS or Android. In the Page Manager, use the arrow buttons on touch screens (drag and drop works with a mouse).</p>
                 </details>
                 <details class="glass-panel rounded-2xl p-5 border border-gray-800 group cursor-pointer">
                     <summary class="font-semibold text-white flex justify-between items-center list-none">
@@ -228,6 +257,13 @@
                         <i class="fa-solid fa-chevron-down text-gray-500 group-open:rotate-180 transition-transform"></i>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3 leading-relaxed">Not currently. Encrypted PDFs need to be unlocked in your PDF viewer first.</p>
+                </details>
+                <details class="glass-panel rounded-2xl p-5 border border-gray-800 group cursor-pointer">
+                    <summary class="font-semibold text-white flex justify-between items-center list-none">
+                        <span>Which characters can I use in a watermark?</span>
+                        <i class="fa-solid fa-chevron-down text-gray-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3 leading-relaxed">Latin letters, numbers and common symbols. The Turkish letters ş, ğ, ı, İ are converted to their closest Latin equivalents (s, g, i, I). Other scripts such as Cyrillic, Arabic or CJK are not supported yet.</p>
                 </details>
             </div>
         </section>
@@ -244,12 +280,22 @@
     </footer>
 
     <script>
-        const TAB_BASE = 'tool-tab flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all ';
+        const TAB_BASE = 'tool-tab flex-1 min-w-[9rem] flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all ';
         const TAB_OFF = TAB_BASE + 'text-gray-400 hover:text-white hover:bg-gray-800/50';
         const TAB_ON = TAB_BASE + 'bg-brand-600 text-white shadow-md';
+        const LIST_DEFAULT = 'space-y-2 max-h-60 overflow-y-auto pr-1';
+        const LIST_GRID = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[30rem] overflow-y-auto pr-1';
 
         let currentTool = 'merge';
         let selectedFiles = [];
+
+        // Page manager state
+        let pageOrder = [];
+        let pdfjsDoc = null;
+        let thumbCache = {};
+        let thumbQueue = Promise.resolve();
+        let thumbObserver = null;
+        let dragIndex = null;
 
         const $ = (id) => document.getElementById(id);
         const dropzone = $('dropzone'), fileInput = $('file-input'), fileList = $('file-list');
@@ -257,10 +303,13 @@
         const processBtn = $('process-btn'), btnText = $('btn-text'), statusBox = $('status-box'), toolOptions = $('tool-options');
 
         const toolMeta = {
-            merge:   { title: 'Merge Multiple PDFs', desc: 'Combine multiple PDF files into a single document instantly.', icon: 'fa-code-merge', accept: 'application/pdf', types: ['application/pdf'], multiple: true, btn: 'Merge & Download PDF', hint: 'PDF files (limited only by your device memory)' },
-            img2pdf: { title: 'Convert Images to PDF', desc: 'Convert JPG, PNG or WebP images into a single PDF file.', icon: 'fa-image', accept: 'image/jpeg,image/png,image/webp', types: ['image/jpeg', 'image/png', 'image/webp'], multiple: true, btn: 'Convert Images to PDF', hint: 'JPG, PNG or WebP images' },
-            split:   { title: 'Split / Extract Pages', desc: 'Extract specific pages from a PDF document into a new file.', icon: 'fa-scissors', accept: 'application/pdf', types: ['application/pdf'], multiple: false, btn: 'Extract Pages & Download', hint: 'One PDF file' },
-            rotate:  { title: 'Rotate PDF Document', desc: 'Rotate all pages in a PDF document by 90, 180, or 270 degrees.', icon: 'fa-rotate-right', accept: 'application/pdf', types: ['application/pdf'], multiple: false, btn: 'Apply Rotation & Download', hint: 'One PDF file' }
+            merge:     { title: 'Merge Multiple PDFs', desc: 'Combine multiple PDF files into a single document instantly.', icon: 'fa-code-merge', accept: 'application/pdf', types: ['application/pdf'], multiple: true, btn: 'Merge & Download PDF', hint: 'PDF files (limited only by your device memory)' },
+            img2pdf:   { title: 'Convert Images to PDF', desc: 'Convert JPG, PNG or WebP images into a single PDF file.', icon: 'fa-image', accept: 'image/jpeg,image/png,image/webp', types: ['image/jpeg', 'image/png', 'image/webp'], multiple: true, btn: 'Convert Images to PDF', hint: 'JPG, PNG or WebP images' },
+            split:     { title: 'Split / Extract Pages', desc: 'Extract specific pages from a PDF document into a new file.', icon: 'fa-scissors', accept: 'application/pdf', types: ['application/pdf'], multiple: false, btn: 'Extract Pages & Download', hint: 'One PDF file' },
+            rotate:    { title: 'Rotate PDF Document', desc: 'Rotate all pages in a PDF document by 90, 180, or 270 degrees.', icon: 'fa-rotate-right', accept: 'application/pdf', types: ['application/pdf'], multiple: false, btn: 'Apply Rotation & Download', hint: 'One PDF file' },
+            watermark: { title: 'Add Watermark to PDF', desc: 'Stamp a centered diagonal text watermark on every page of your PDF.', icon: 'fa-stamp', accept: 'application/pdf', types: ['application/pdf'], multiple: false, btn: 'Apply Watermark & Download', hint: 'One PDF file' },
+            pdf2img:   { title: 'PDF to Images', desc: 'Convert each page into a PNG image. Multi-page PDFs download as one ZIP.', icon: 'fa-images', accept: 'application/pdf', types: ['application/pdf'], multiple: false, btn: 'Convert & Download Images', hint: 'One PDF file' },
+            pages:     { title: 'Visual Page Manager', desc: 'Reorder and delete pages with thumbnail previews.', icon: 'fa-file-lines', accept: 'application/pdf', types: ['application/pdf'], multiple: false, btn: 'Save Organized PDF', hint: 'One PDF file' }
         };
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -270,13 +319,23 @@
 
         function scrollToTool() { $('tool-studio').scrollIntoView({ behavior: 'smooth' }); }
 
+        function resetPages() {
+            pageOrder = [];
+            thumbCache = {};
+            thumbQueue = Promise.resolve();
+            dragIndex = null;
+            if (thumbObserver) { thumbObserver.disconnect(); thumbObserver = null; }
+            if (pdfjsDoc) { try { pdfjsDoc.destroy(); } catch (e) {} pdfjsDoc = null; }
+        }
+
         function switchTool(key) {
             currentTool = key;
             selectedFiles = [];
+            resetPages();
             fileInput.value = '';
             clearStatus();
 
-            document.querySelectorAll('.tool-tab').forEach(t => { t.className = TAB_OFF; t.setAttribute('aria-selected', 'false'); });
+            document.querySelectorAll('[role="tab"]').forEach(t => { t.className = TAB_OFF; t.setAttribute('aria-selected', 'false'); });
             const active = $('tab-' + key);
             active.className = TAB_ON;
             active.setAttribute('aria-selected', 'true');
@@ -298,9 +357,9 @@
             dropzone.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
             });
-            fileInput.addEventListener('change', (e) => {
-                handleFileSelection(Array.from(e.target.files));
-                fileInput.value = ''; // allows re-selecting the same file
+            fileInput.addEventListener('change', async (e) => {
+                await handleFileSelection(Array.from(e.target.files));
+                fileInput.value = '';
             });
 
             ['dragenter', 'dragover'].forEach(n => dropzone.addEventListener(n, (e) => {
@@ -309,7 +368,7 @@
             ['dragleave', 'drop'].forEach(n => dropzone.addEventListener(n, (e) => {
                 e.preventDefault(); dropzone.classList.remove('drag-over');
             }));
-            dropzone.addEventListener('drop', (e) => handleFileSelection(Array.from(e.dataTransfer.files)));
+            dropzone.addEventListener('drop', async (e) => await handleFileSelection(Array.from(e.dataTransfer.files)));
 
             // Stop the browser from navigating away when a file is dropped outside the dropzone
             ['dragover', 'drop'].forEach(n => window.addEventListener(n, (e) => e.preventDefault()));
@@ -318,11 +377,10 @@
         function isAllowed(file) {
             const meta = toolMeta[currentTool];
             if (meta.types.includes(file.type)) return true;
-            // some systems report an empty MIME type for PDFs
             return meta.types.includes('application/pdf') && file.name.toLowerCase().endsWith('.pdf');
         }
 
-        function handleFileSelection(files) {
+        async function handleFileSelection(files) {
             if (!files.length) return;
             const valid = files.filter(isAllowed);
             const rejected = files.length - valid.length;
@@ -330,7 +388,29 @@
                 showStatus('Unsupported file type. This tool accepts: ' + toolMeta[currentTool].hint + '.', 'error');
                 return;
             }
-            selectedFiles = toolMeta[currentTool].multiple ? [...selectedFiles, ...valid] : [valid[0]];
+
+            const tool = currentTool;
+            const newSelection = toolMeta[tool].multiple ? [...selectedFiles, ...valid] : [valid[0]];
+
+            if (tool === 'pages') {
+                resetPages();
+                try {
+                    const file = newSelection[0];
+                    const pdf = await loadPdf(file);
+                    const buf = await file.arrayBuffer();
+                    const doc = await pdfjsLib.getDocument({ data: buf }).promise; // pdf.js takes ownership of this buffer
+                    if (currentTool !== 'pages') { doc.destroy(); return; }
+                    pdfjsDoc = doc;
+                    pageOrder = Array.from({ length: pdf.getPageCount() }, (_, i) => i);
+                } catch (err) {
+                    selectedFiles = [];
+                    renderFileList(); renderToolOptions(); updateProcessButton();
+                    showStatus(friendlyError(err), 'error');
+                    return;
+                }
+            }
+
+            selectedFiles = newSelection;
             renderFileList();
             renderToolOptions();
             updateProcessButton();
@@ -349,10 +429,26 @@
             return b;
         }
 
+        /* ---------- File list rendering ---------- */
+
         function renderFileList() {
             fileList.innerHTML = '';
+            const hint = $('list-hint');
             if (!selectedFiles.length) { fileListContainer.classList.add('hidden'); return; }
             fileListContainer.classList.remove('hidden');
+
+            if (currentTool === 'pages') {
+                $('list-label').textContent = 'Pages';
+                hint.textContent = 'Drag cards to reorder (mouse), or use the arrow buttons. Click ✕ to delete a page.';
+                hint.classList.remove('hidden');
+                fileList.className = LIST_GRID;
+                renderPageGrid();
+                return;
+            }
+
+            $('list-label').textContent = 'Selected Items';
+            hint.classList.add('hidden');
+            fileList.className = LIST_DEFAULT;
             fileCountSpan.textContent = selectedFiles.length;
 
             selectedFiles.forEach((file, index) => {
@@ -363,7 +459,7 @@
                 left.className = 'flex items-center gap-3 overflow-hidden';
                 left.innerHTML = `<div class="w-8 h-8 rounded-lg bg-gray-800 text-brand-400 flex items-center justify-center shrink-0"><i class="${file.type.startsWith('image') ? 'fa-regular fa-image' : 'fa-regular fa-file-pdf'}"></i></div>
                     <div class="truncate"><p class="text-white font-medium truncate" data-name></p><p class="text-xs text-gray-500" data-size></p></div>`;
-                left.querySelector('[data-name]').textContent = file.name;          // textContent prevents XSS
+                left.querySelector('[data-name]').textContent = file.name;
                 left.querySelector('[data-size]').textContent = (file.size / 1048576).toFixed(2) + ' MB';
 
                 const right = document.createElement('div');
@@ -379,6 +475,124 @@
             });
         }
 
+        /* ---------- Visual page manager ---------- */
+
+        function setThumb(holder, src) {
+            holder.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = '';
+            img.draggable = false;
+            img.className = 'max-w-full max-h-full object-contain rounded';
+            holder.appendChild(img);
+        }
+
+        function ensureThumb(orig, holder) {
+            if (thumbCache[orig]) { setThumb(holder, thumbCache[orig]); return; }
+            thumbQueue = thumbQueue.then(async () => {
+                if (!pdfjsDoc) return;
+                if (!thumbCache[orig]) {
+                    const page = await pdfjsDoc.getPage(orig + 1);
+                    const base = page.getViewport({ scale: 1 });
+                    const vp = page.getViewport({ scale: 150 / base.width });
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.ceil(vp.width);
+                    canvas.height = Math.ceil(vp.height);
+                    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+                    thumbCache[orig] = canvas.toDataURL('image/jpeg', 0.7);
+                    canvas.width = canvas.height = 0;
+                    page.cleanup();
+                }
+                if (holder.isConnected) setThumb(holder, thumbCache[orig]);
+            }).catch(() => {});
+        }
+
+        function renderPageGrid() {
+            fileCountSpan.textContent = pageOrder.length;
+            if (thumbObserver) thumbObserver.disconnect();
+            thumbObserver = new IntersectionObserver((entries) => {
+                entries.forEach(en => {
+                    if (en.isIntersecting) {
+                        thumbObserver.unobserve(en.target);
+                        ensureThumb(parseInt(en.target.dataset.orig, 10), en.target);
+                    }
+                });
+            }, { root: fileList, rootMargin: '300px' });
+
+            pageOrder.forEach((orig, index) => {
+                const card = document.createElement('div');
+                card.className = 'page-card relative rounded-xl bg-gray-900/90 border border-gray-800 p-2 cursor-grab';
+                card.draggable = true;
+
+                const holder = document.createElement('div');
+                holder.className = 'aspect-[3/4] bg-gray-800 rounded flex items-center justify-center text-gray-600';
+                holder.dataset.orig = orig;
+                holder.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+                const footer = document.createElement('div');
+                footer.className = 'mt-2 flex items-center justify-between gap-1';
+                const label = document.createElement('div');
+                label.className = 'text-xs min-w-0';
+                label.innerHTML = '<p class="text-white font-medium truncate" data-p></p><p class="text-gray-500" data-pos></p>';
+                label.querySelector('[data-p]').textContent = 'Page ' + (orig + 1);
+                label.querySelector('[data-pos]').textContent = '#' + (index + 1);
+
+                const btns = document.createElement('div');
+                btns.className = 'flex items-center gap-0.5 shrink-0';
+                btns.appendChild(iconButton('Move page earlier', 'fa-solid fa-arrow-left text-xs', 'text-gray-400 hover:text-white p-1.5', index === 0, () => movePageOrder(index, -1)));
+                btns.appendChild(iconButton('Move page later', 'fa-solid fa-arrow-right text-xs', 'text-gray-400 hover:text-white p-1.5', index === pageOrder.length - 1, () => movePageOrder(index, 1)));
+                btns.appendChild(iconButton('Delete page', 'fa-solid fa-xmark text-xs', 'text-rose-400 hover:text-rose-300 p-1.5', pageOrder.length <= 1, () => removePageOrder(index)));
+
+                footer.append(label, btns);
+                card.append(holder, footer);
+
+                card.addEventListener('dragstart', (e) => {
+                    dragIndex = index;
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', String(index));
+                    card.classList.add('dragging');
+                });
+                card.addEventListener('dragend', () => card.classList.remove('dragging'));
+                card.addEventListener('dragover', (e) => { e.preventDefault(); card.classList.add('drag-target'); });
+                card.addEventListener('dragleave', () => card.classList.remove('drag-target'));
+                card.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    card.classList.remove('drag-target');
+                    if (dragIndex === null || dragIndex === index) return;
+                    const [moved] = pageOrder.splice(dragIndex, 1);
+                    pageOrder.splice(index, 0, moved);
+                    dragIndex = null;
+                    renderFileList();
+                });
+
+                fileList.appendChild(card);
+                if (thumbCache[orig]) setThumb(holder, thumbCache[orig]);
+                else thumbObserver.observe(holder);
+            });
+        }
+
+        function movePageOrder(index, dir) {
+            const j = index + dir;
+            if (j < 0 || j >= pageOrder.length) return;
+            [pageOrder[index], pageOrder[j]] = [pageOrder[j], pageOrder[index]];
+            const top = fileList.scrollTop;
+            renderFileList();
+            fileList.scrollTop = top;
+        }
+
+        function removePageOrder(index) {
+            if (pageOrder.length <= 1) {
+                showStatus('You must keep at least one page in the document.', 'error');
+                return;
+            }
+            pageOrder.splice(index, 1);
+            const top = fileList.scrollTop;
+            renderFileList();
+            fileList.scrollTop = top;
+        }
+
+        /* ---------- List actions ---------- */
+
         function moveFile(index, dir) {
             const j = index + dir;
             if (j < 0 || j >= selectedFiles.length) return;
@@ -393,9 +607,12 @@
 
         function clearFiles() {
             selectedFiles = [];
+            resetPages();
             fileInput.value = '';
             renderFileList(); renderToolOptions(); updateProcessButton(); clearStatus();
         }
+
+        /* ---------- Options ---------- */
 
         const INPUT_CLS = 'w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-500';
         const LABEL_CLS = 'block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2';
@@ -423,6 +640,23 @@
                         <option value="a4">Fit to A4 (with margins)</option>
                         <option value="original">Original image size</option>
                     </select>`;
+            } else if (currentTool === 'watermark') {
+                toolOptions.innerHTML = `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="watermark-text" class="${LABEL_CLS}">Watermark Text</label>
+                            <input type="text" id="watermark-text" value="CONFIDENTIAL" maxlength="60" class="${INPUT_CLS}">
+                        </div>
+                        <div>
+                            <label for="watermark-opacity" class="${LABEL_CLS}">Opacity</label>
+                            <select id="watermark-opacity" class="${INPUT_CLS}">
+                                <option value="0.2">Light (20%)</option>
+                                <option value="0.3" selected>Medium (30%)</option>
+                                <option value="0.5">Strong (50%)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500">Latin characters only. ş, ğ, ı, İ are converted to s, g, i, I automatically.</p>`;
             } else {
                 toolOptions.classList.add('hidden');
             }
@@ -430,7 +664,7 @@
 
         function updateProcessButton() {
             const meta = toolMeta[currentTool];
-            const ready = selectedFiles.length > 0;
+            const ready = selectedFiles.length > 0 && (currentTool !== 'pages' || pageOrder.length > 0);
             processBtn.disabled = !ready;
             processBtn.className = ready
                 ? 'w-full sm:w-auto flex-1 py-3.5 px-6 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-base flex items-center justify-center gap-2 transition-all shadow-lg shadow-brand-600/30 cursor-pointer'
@@ -438,18 +672,22 @@
             btnText.textContent = ready ? meta.btn : 'Select Files to Begin';
         }
 
+        /* ---------- Processing ---------- */
+
         async function processPDF() {
             if (!selectedFiles.length) return;
             showStatus('Processing files locally in your browser...', 'info');
             processBtn.disabled = true;
             btnText.textContent = 'Processing...';
-            // let the browser paint the status before heavy work starts
             await new Promise(r => setTimeout(r, 30));
             try {
                 if (currentTool === 'merge') await executeMerge();
                 else if (currentTool === 'img2pdf') await executeImgToPdf();
                 else if (currentTool === 'split') await executeSplit();
                 else if (currentTool === 'rotate') await executeRotate();
+                else if (currentTool === 'watermark') await executeWatermark();
+                else if (currentTool === 'pdf2img') await executePdfToImg();
+                else if (currentTool === 'pages') await executePageManager();
             } catch (err) {
                 console.error(err);
                 showStatus('Error: ' + friendlyError(err), 'error');
@@ -460,7 +698,9 @@
 
         function friendlyError(err) {
             const msg = (err && err.message) || String(err);
-            if (/encrypt/i.test(msg)) return 'This PDF is password-protected. Please unlock it first and try again.';
+            if ((err && err.name === 'PasswordException') || /encrypt|password/i.test(msg)) {
+                return 'This PDF is password-protected. Please unlock it first and try again.';
+            }
             return msg;
         }
 
@@ -485,7 +725,6 @@
             showStatus('PDFs merged successfully!', 'success');
         }
 
-        // Draws the image through a canvas: applies EXIF orientation (JPEG) and converts WebP.
         async function imageToEmbeddable(file) {
             if (file.type === 'image/png') return { bytes: await file.arrayBuffer(), kind: 'png' };
             const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
@@ -497,6 +736,7 @@
             ctx.drawImage(bmp, 0, 0);
             if (bmp.close) bmp.close();
             const blob = await new Promise((res, rej) => canvas.toBlob(b => b ? res(b) : rej(new Error('Image conversion failed')), asJpeg ? 'image/jpeg' : 'image/png', 0.92));
+            canvas.width = canvas.height = 0;
             return { bytes: await blob.arrayBuffer(), kind: asJpeg ? 'jpg' : 'png' };
         }
 
@@ -549,6 +789,118 @@
             showStatus('PDF rotated successfully!', 'success');
         }
 
+        // The built-in Helvetica font cannot encode ş ğ ı İ Ş Ğ, so map them to Latin lookalikes.
+        function toLatin(str) {
+            const map = { 'ş': 's', 'Ş': 'S', 'ğ': 'g', 'Ğ': 'G', 'ı': 'i', 'İ': 'I' };
+            return str.replace(/[şŞğĞıİ]/g, c => map[c]);
+        }
+
+        async function executeWatermark() {
+            const raw = (($('watermark-text') || {}).value || '').trim();
+            if (!raw) throw new Error('Please enter the watermark text.');
+            const text = toLatin(raw);
+            const opacity = parseFloat(($('watermark-opacity') || {}).value) || 0.3;
+
+            const pdf = await loadPdf(selectedFiles[0]);
+            const font = await pdf.embedFont(PDFLib.StandardFonts.HelveticaBold);
+
+            let unit;
+            try {
+                unit = font.widthOfTextAtSize(text, 1);
+            } catch (e) {
+                const bad = [...new Set([...text].filter(c => c.codePointAt(0) > 255))].join(' ');
+                throw new Error('The watermark contains unsupported characters' + (bad ? ': ' + bad : '') + '. Please use Latin letters, numbers and common symbols.');
+            }
+
+            pdf.getPages().forEach(page => {
+                const { width, height } = page.getSize();
+                const rot = ((page.getRotation().angle % 360) + 360) % 360;
+
+                // Fit the text on the diagonal, then center it around the page center.
+                const maxLen = 0.85 * Math.min(width, height) * Math.SQRT2;
+                const size = Math.min(72, maxLen / unit);
+                const tw = unit * size;
+                const rad = (45 + rot) * Math.PI / 180;     // compensate for the page's own /Rotate
+                const a = tw / 2, b = size * 0.35;
+                const x = width / 2 - (a * Math.cos(rad) - b * Math.sin(rad));
+                const y = height / 2 - (a * Math.sin(rad) + b * Math.cos(rad));
+
+                page.drawText(text, {
+                    x, y, size, font,
+                    color: PDFLib.rgb(0.6, 0.6, 0.6),
+                    opacity,
+                    rotate: PDFLib.degrees(45 + rot),
+                });
+            });
+
+            downloadFile(await pdf.save(), 'pdffuse_watermarked.pdf', 'application/pdf');
+            showStatus('Watermark applied successfully!', 'success');
+        }
+
+        async function executePdfToImg() {
+            if (typeof JSZip === 'undefined') throw new Error('ZIP library failed to load. Please refresh the page.');
+            const file = selectedFiles[0];
+            const buf = await file.arrayBuffer();
+
+            let doc;
+            try {
+                doc = await pdfjsLib.getDocument({ data: buf }).promise;
+            } catch (e) {
+                if (e && e.name === 'PasswordException') throw new Error('This PDF is password-protected. Please unlock it first and try again.');
+                throw new Error(`"${file.name}" could not be read as a valid PDF.`);
+            }
+
+            const n = doc.numPages;
+            const base = file.name.replace(/\.pdf$/i, '') || 'pdffuse';
+            const zip = n > 1 ? new JSZip() : null;
+            const pad = String(n).length;
+            const MAX_PIXELS = 16000000; // keeps canvases within mobile browser limits
+
+            try {
+                for (let i = 1; i <= n; i++) {
+                    showStatus(`Rendering page ${i} of ${n}...`, 'info');
+                    await new Promise(r => setTimeout(r, 0));
+
+                    const page = await doc.getPage(i);
+                    const v1 = page.getViewport({ scale: 1 });
+                    const scale = Math.min(2, Math.sqrt(MAX_PIXELS / (v1.width * v1.height)));
+                    const vp = page.getViewport({ scale });
+                    const canvas = document.createElement('canvas');
+                    canvas.width = Math.floor(vp.width);
+                    canvas.height = Math.floor(vp.height);
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+
+                    const blob = await new Promise((res, rej) => canvas.toBlob(b => b ? res(b) : rej(new Error('Could not render page ' + i)), 'image/png'));
+                    canvas.width = canvas.height = 0;   // release canvas memory
+                    page.cleanup();
+
+                    if (zip) zip.file(`${base}_page_${String(i).padStart(pad, '0')}.png`, blob);
+                    else downloadFile(blob, `${base}.png`, 'image/png');
+                }
+
+                if (zip) {
+                    showStatus('Creating ZIP file...', 'info');
+                    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
+                    downloadFile(zipBlob, `${base}_images.zip`, 'application/zip');
+                }
+            } finally {
+                doc.destroy();
+            }
+            showStatus(n > 1 ? `Done! ${n} page images downloaded as a ZIP.` : 'Page image downloaded!', 'success');
+        }
+
+        async function executePageManager() {
+            const pdf = await loadPdf(selectedFiles[0]);
+            const out = await PDFLib.PDFDocument.create();
+            const pages = await out.copyPages(pdf, pageOrder);
+            pages.forEach(p => out.addPage(p));
+            downloadFile(await out.save(), 'pdffuse_organized.pdf', 'application/pdf');
+            showStatus(`Saved a PDF with ${pageOrder.length} page(s) in your new order!`, 'success');
+        }
+
         function parsePageRange(str, maxPages) {
             const indices = [];
             const add = (i) => { if (!indices.includes(i)) indices.push(i); };
@@ -565,7 +917,7 @@
                     const start = parseInt(m[1], 10);
                     const end = m[2] === '' ? maxPages : parseInt(m[2], 10);
                     if (start < 1 || start > maxPages) throw new Error(`Page ${start} is out of range (document has ${maxPages} pages).`);
-                    if (end < start) throw new Error(`Invalid range "${part}": the start must not be greater than the end.`);
+                    if (end < start) throw new Error(`Invalid range "${part}": start must not be greater than end.`);
                     for (let i = start; i <= Math.min(end, maxPages); i++) add(i - 1);
                 } else {
                     throw new Error(`Invalid page range "${part}". Use a format like 1-3, 5, 7-`);
